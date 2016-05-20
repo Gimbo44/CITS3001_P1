@@ -99,7 +99,7 @@ public class PylosBoard {
 			break;
 		case 4:
 			//Is place is already occupied
-			if (level4 != 0) { 
+			if (level4 != 0) {
 				return false;
 			}
 			//Is there 4 pieces under it 
@@ -374,5 +374,24 @@ public class PylosBoard {
 		System.out.println("Level 4:");
 		System.out.println(level4);
 		System.out.println();
+		
+		System.out.println("You have " + playerPieces + " pieces remaining and the ai has " + aiPieces + " pieces remaining");
+		System.out.println();
+	}
+	
+	public int[][] getLevel1() {
+		return level1;
+	}
+	
+	public int[][] getLevel2() {
+		return level2;
+	}
+	
+	public int[][] getLevel3() {
+		return level3;
+	}
+	
+	public int getLevel4() {
+		return level4;
 	}
 }
