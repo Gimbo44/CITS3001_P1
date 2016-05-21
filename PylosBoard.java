@@ -1,3 +1,7 @@
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 public class PylosBoard {
 	
 	private int[][] level1; // 0 for no piece, 1 for Human, 2 for AI
@@ -6,7 +10,7 @@ public class PylosBoard {
 	private int level4; // a one by one array is pointless, just use an int. Also this place will never be occupied
 	private int playerPieces;
 	private int aiPieces;
-
+	private ArrayList<String> moves;
 	/**
 	 * Create a new Pylos Board
 	 */
@@ -17,8 +21,30 @@ public class PylosBoard {
 		level4 = 0;
 		playerPieces = 15;
 		aiPieces = 15;
+
+		this.moves = new ArrayList<String>(Arrays.asList(
+				// <level><row><col>
+				"100", "101", "102", "103",
+				"110", "111", "112", "113",
+				"120", "121", "122", "123",
+				"130", "131", "132", "133",
+
+				"200", "201", "202",
+				"210", "211", "212",
+				"220", "221", "222",
+
+				"300", "301",
+				"310", "311",
+
+				"400"
+		));
 	}
-	
+
+
+	public ArrayList<String> getMoves() {
+		return moves;
+	}
+
 	/**
 	 * Place the piece on the board. Parameters are not checked as valid as they are checked in the Pylos.checkInput method
 	 * @param piece Which player is making the move
@@ -48,9 +74,12 @@ public class PylosBoard {
 				level4 = piece;
 				break;
 		}
-		
+
+
 		recordPieces(piece, true);
-				
+		String moveSignature = Integer.toString(level) + Integer.toString(row) + Integer.toString(column);
+		moves.remove(moveSignature);
+
 		if (mayRemovePiece(piece, level, row, column)) {
 			return 1;
 		}
@@ -108,6 +137,11 @@ public class PylosBoard {
 			}
 			break;
 		}
+		String moveSignature = Integer.toString(level) + Integer.toString(row) + Integer.toString(column);
+		if(!this.moves.contains(moveSignature)){
+			return false;
+		}
+
 		return true;
 	}
 
@@ -119,6 +153,7 @@ public class PylosBoard {
 	 * @return true if piece removed, false if not
 	 */
 	public boolean removePiece(int piece, int level, int row, int column) {
+		String moveSignature = Integer.toString(level) + Integer.toString(row) + Integer.toString(column);
 		switch (level){
 			case 1:
 				//Check for pieces above //I'm sure it could be done lots better without catching exceptions, but it works
@@ -144,6 +179,8 @@ public class PylosBoard {
 				} catch (ArrayIndexOutOfBoundsException e) {/*Ignore*/}
 				
 				if (level1[row][column] == piece) { //checks player is removing their own piece
+
+					this.moves.add(moveSignature);
 					level1[row][column] = 0;
 					recordPieces(piece, false);
 					return true;
@@ -174,6 +211,7 @@ public class PylosBoard {
 				
 				if (level2[row][column] == piece) { //checks player is removing their own piece
 					level2[row][column] = 0;
+					this.moves.add(moveSignature);
 					recordPieces(piece, false);
 					return true;
 				}
@@ -186,6 +224,7 @@ public class PylosBoard {
 				if (level3[row][column] == piece) { //checks player is removing their own piece
 					level3[row][column] = 0;
 					recordPieces(piece, false);
+					this.moves.add(moveSignature);
 					return true;
 				}
 				break;
@@ -193,6 +232,7 @@ public class PylosBoard {
 				if (level4 == piece) { //checks player is removing their own piece
 					level4 = 0;
 					recordPieces(piece, false);
+					this.moves.add(moveSignature);
 					return true;
 				}
 				break;

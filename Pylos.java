@@ -84,7 +84,7 @@ public class Pylos {
 				int aiMoveReturn = -1;
 				while(aiMoveReturn == -1) {
 					//keep looping until it finds a valid move. If the ai was smart and not completely random maybe this would be unnecessary as the ai could only select a valid move?
-					int[] aiMove = aiPlayer.makeMove(board);
+					int[] aiMove = aiPlayer.makeMove(false, board);
 					aiMoveReturn = board.placePiece(2, aiMove[0], aiMove[1], aiMove[2]);
 					if (aiMoveReturn != -1) {
 						System.out.println("AI placed a piece at level " + aiMove[0] + " row " + (aiMove[1] + 1) + " column " + (aiMove[2] + 1));
@@ -93,7 +93,7 @@ public class Pylos {
 
 				if (aiMoveReturn == 1) { //AI must remove piece or two
 					while (true) {					
-						int[] aiMove = aiPlayer.makeMove(board);
+						int[] aiMove = aiPlayer.makeMove(true, board);
 						if (board.removePiece(2, aiMove[0], aiMove[1], aiMove[2])) {
 							System.out.println("AI removed a piece at level " + aiMove[0] + " row " + (aiMove[1] + 1) + " column " + (aiMove[2] + 1));
 							break;
@@ -103,7 +103,7 @@ public class Pylos {
 						if (!aiPlayer.removeTwo()) { //the second remove is optional
 							break;
 						}
-						int[] aiMove = aiPlayer.makeMove(board);
+						int[] aiMove = aiPlayer.makeMove(true, board);
 						if (board.removePiece(2, aiMove[0], aiMove[1], aiMove[2])) {
 							System.out.println("AI removed a piece at level " + aiMove[0] + " row " + (aiMove[1] + 1) + " column " + (aiMove[2] + 1));
 							break;

@@ -1,4 +1,7 @@
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
+
 
 public class AiPlayerGreedy1 {
 
@@ -12,63 +15,182 @@ public class AiPlayerGreedy1 {
             -   Making a square of the same colours
             -   Making a line of 3 on level two OR a square
         We need to avoid the above three conditions as best as we can. Worst case we will take 1 off only.
+*/
 
-     */
+    private Random random;
 
-    public boolean isFull(int[][] level){
-        for(int row = 0; row < level.length; row++){
-            for(int col = 0; col < level[row].length; col++){
-                if(level[row][col] == 0){
-                    return false;
-                }
-            }
-        }
-        return true;
+    private Squares[] level1;
+    private Squares[] level2;
+    private Squares[] level3;
+
+
+    public AiPlayerGreedy1() {
+        this.level1 = new Squares[]{
+                new Squares(1,0,0,2, new int[][]{{0,0},{0,1},{1,0},{1,1}}),
+                new Squares(1,0,1,2, new int[][]{{0,1},{0,2},{1,1},{1,2}}),
+                new Squares(1,0,2,2, new int[][]{{0,2},{0,3},{1,2},{1,3}}),
+                new Squares(1,1,0,2, new int[][]{{1,0},{1,1},{2,0},{2,1}}),
+                new Squares(1,1,1,2, new int[][]{{1,1},{1,2},{2,1},{2,2}}),
+                new Squares(1,1,2,2, new int[][]{{1,2},{1,3},{2,2},{2,3}}),
+                new Squares(1,2,0,2, new int[][]{{2,0},{2,1},{3,0},{3,1}}),
+                new Squares(1,2,1,2, new int[][]{{2,1},{2,2},{3,1},{3,2}}),
+                new Squares(1,2,2,2, new int[][]{{2,2},{2,3},{3,2},{3,3}})
+        };
+        this.level2 = new Squares[]{
+                new Squares(2,0,0,3, new int[][]{{0,0},{0,1},{1,0},{1,1}}),
+                new Squares(2,0,1,3, new int[][]{{0,1},{0,2},{1,1},{1,2}}),
+                new Squares(2,1,0,3, new int[][]{{1,0},{1,1},{2,0},{2,1}}),
+                new Squares(2,1,1,3, new int[][]{{1,1},{1,2},{2,1},{2,2}})
+        };
+        this.level3 = new Squares[]{
+                new Squares(3,0,0,4, new int[][]{{0,0},{0,1},{1,0},{1,1}})
+        };
+
+        this.random = new Random();
+
+
     }
 
-    private int[][] getLevel(PylosBoard board, int level){
-        int[][] lvl = null;
-        switch(level){
-            case 1:
-                lvl =  board.getLevel1();
-                break;
-            case 2:
-                lvl = board.getLevel2();
-                break;
-            case 3:
-                lvl = board.getLevel3();
-                break;
-            case 4:
-                lvl = new int[][]{{board.getLevel4()}};
-                break;
-        }
-        return lvl;
-    }
-
-    public int[] makeMove(PylosBoard board ) {
-        //int level = random.nextInt(4) + 1; //random.nextInt(max - min + 1) + 1  https://stackoverflow.com/a/20389923
-        int[][] grid;
+    public int[] makeMove(boolean remove, PylosBoard board ) {
         int[] move = null;
-        for(int level = 4; level > 0; level--){
+        if (remove) {
+            //systematically look for pieces to remove, does nothing clever here. problem, what if piece can not be removed?
+            for (int i : new int[] {0, 1}) {
+                for (int j : new int[] {0, 1}) {
+                    //check nothing above
+                    if (board.getLevel4() != 0) {
+                        continue;
+                    }
 
-            grid = this.getLevel(board,level);
-
-            for(int row = 0; row < grid.length; row++){
-                for(int col = 0; col < grid.length; col++){
-                    if(board.validMove(level,row,col)){
-                        move =  new int[] {level,row, col};
-                        break;
+                    //check correct player
+                    if (board.getLevel3()[i][j] == 2) {
+                        return new int[] {3, i, j};
                     }
                 }
-                if(move != null){
-                    break;
+            }
+            for (int i : new int[] {0, 1, 2}) {
+                for (int j : new int[] {0, 1, 2}) {
+                    //check nothing above
+                    try {
+                        if (board.getLevel3()[i][j] != 0) {
+                            continue;
+                        }
+                    } catch (ArrayIndexOutOfBoundsException e) {/*Ignore*/}
+                    try {
+                        if (board.getLevel3()[i - 1][j] != 0) {
+                            continue;
+                        }
+                    } catch (ArrayIndexOutOfBoundsException e) {/*Ignore*/}
+                    try {
+                        if (board.getLevel3()[i][j - 1] != 0) {
+                            continue;
+                        }
+                    } catch (ArrayIndexOutOfBoundsException e) {/*Ignore*/}
+                    try {
+                        if (board.getLevel3()[i - 1][j - 1] != 0) {
+                            continue;
+                        }
+                    } catch (ArrayIndexOutOfBoundsException e) {/*Ignore*/}
+
+                    //check correct player
+                    if (board.getLevel2()[i][j] == 2) {
+                        return new int[] {2, i, j};
+                    }
                 }
             }
-            if(move != null){
-                break;
+            for (int i : new int[] {0, 1, 2, 3}) {
+                for (int j : new int[] {0, 1, 2, 3}) {
+                    //check nothing above
+                    try {
+                        if (board.getLevel2()[i][j] != 0) {
+                            continue;
+                        }
+                    } catch (ArrayIndexOutOfBoundsException e) {/*Ignore*/}
+                    try {
+                        if (board.getLevel2()[i - 1][j] != 0) {
+                            continue;
+                        }
+                    } catch (ArrayIndexOutOfBoundsException e) {/*Ignore*/}
+                    try {
+                        if (board.getLevel2()[i][j - 1] != 0) {
+                            continue;
+                        }
+                    } catch (ArrayIndexOutOfBoundsException e) {/*Ignore*/}
+                    try {
+                        if (board.getLevel2()[i - 1][j - 1] != 0) {
+                            continue;
+                        }
+                    } catch (ArrayIndexOutOfBoundsException e) {/*Ignore*/}
+
+                    //check correct player
+                    if (board.getLevel1()[i][j] == 2) {
+                        return new int[] {1, i, j};
+                    }
+                }
+            }
+            return new int[] {4, 1, 1};
+        }else {
+            //int level = random.nextInt(4) + 1; //random.nextInt(max - min + 1) + 1  https://stackoverflow.com/a/20389923
+            // Start by doing some pre-processing
+
+
+            for (Squares square : this.level3) {
+                int counter = 0;
+                for (int j = 0; j < square.getSquarePositions().length; j++) {
+                    int[] place = square.getSquarePositions()[j];
+
+                    if (board.getLevel3()[place[0]][place[1]] != 0) {
+                        counter++;
+                    }
+                }
+                if (counter == 4 && board.getLevel2()[square.getRoofRow()][square.getRoofCol()] == 0) {  // all four supports are set!
+                    move = new int[]{4, square.getRoofRow(), square.getRoofCol()};
+                }
+            }
+            if (move == null) {
+                for (Squares square : this.level2) {
+                    int counter = 0;
+                    for (int j = 0; j < square.getSquarePositions().length; j++) {
+                        int[] place = square.getSquarePositions()[j];
+
+                        if (board.getLevel2()[place[0]][place[1]] != 0) {
+                            counter++;
+                        }
+                    }
+                    if (counter == 4 && board.getLevel2()[square.getRoofRow()][square.getRoofCol()] == 0) {   // all four supports are set!
+                        move = new int[]{3, square.getRoofRow(), square.getRoofCol()};
+                    }
+                }
             }
 
+            if (move == null) {
+                for (Squares square : this.level1) {
+                    int counter = 0;
+                    for (int j = 0; j < square.getSquarePositions().length; j++) {
+                        int[] place = square.getSquarePositions()[j];
+
+                        if (board.getLevel1()[place[0]][place[1]] != 0) {
+                            counter++;
+                        }
+                    }
+                    if (counter == 4 && board.getLevel2()[square.getRoofRow()][square.getRoofCol()] == 0) {   // all four supports are set!
+                        move = new int[]{2, square.getRoofRow(), square.getRoofCol()};
+                    }
+                }
+            }
+
+            if (move == null) {
+                ArrayList<String> moveOptions = board.getMoves();
+                String option = moveOptions.get(random.nextInt(moveOptions.size()));
+                move = new int[]{
+                        Integer.parseInt(String.valueOf(option.charAt(0))),  //So damn messy..
+                        Integer.parseInt(String.valueOf(option.charAt(1))),
+                        Integer.parseInt(String.valueOf(option.charAt(2)))
+                };
+
+            }
         }
+
 
         return move;
     }

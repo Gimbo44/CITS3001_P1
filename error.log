@@ -1,0 +1,58 @@
+21/05/2016
+-------------------------------------------------------------------------
+Constantly trying to give "2,2,2" as a valid AI answer.
+-------------------------------------------------------------------------
+
+Enter your move in the format: level row column 1 4 1
+AI placed a piece at level 1 row 3 column 4
+Level 1:
+1 1 2 1
+1 2 1 2
+2 2 0 2
+1 0 1 1
+Level 2:
+2 1 2
+2 0 0
+0 0 0
+Level 3:
+0 0
+0 0
+Level 4:
+0
+
+You have 6 pieces remaining and the ai has 6 pieces remaining
+
+Enter your move in the format: level row column 1 4 2
+You may remove 1 or 2 of your pieces
+Enter the first piece you want to remove in the format: level row column 1 4 1
+Enter the second piece you want to remove in the format (leave blank to remove no piece): level row column 1 4 2
+AI placed a piece at level 1 row 3 column 3
+
+
+
+--------------
+The actual board would've been:
+
+Level 1:
+1 1 2 1
+1 2 1 2
+2 2 2 2
+1 0 1 1
+Level 2:
+2 1 2
+2 0 0
+0 0 0
+Level 3:
+0 0
+0 0
+Level 4:
+0
+
+SOLUTION! Found it might be triggered when asked if it wants to remove more than one... Huh
+
+Might be good to keep track of all pieces placed and places available.. 
+	would be messy but would cut down on run-time.
+
+
+Getting stuck at line 95-97
+Gets stuck because it keeps trying to remove an optimal piece... which hasn't been set.
