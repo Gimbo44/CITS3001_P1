@@ -51,89 +51,27 @@ public class AiPlayerGreedy1 {
 
     }
 
+    /**
+     * A complex algorithm to return the next "optimal" move for the AI player.
+     *
+     * @param remove    ,Boolean value indicating whether a removal is required or not.
+     * @param board     , PylosBoard object representing the current state of the board.
+     * @return  int[] with the following format: int[] { level, row, column}. This represents a move.
+     */
     public int[] makeMove(boolean remove, PylosBoard board ) {
         int[] move = null;
         if (remove) {
-            //systematically look for pieces to remove, does nothing clever here. problem, what if piece can not be removed?
-            for (int i : new int[] {0, 1}) {
-                for (int j : new int[] {0, 1}) {
-                    //check nothing above
-                    if (board.getLevel4() != 0) {
-                        continue;
-                    }
-
-                    //check correct player
-                    if (board.getLevel3()[i][j] == 2) {
-                        return new int[] {3, i, j};
-                    }
-                }
+            PlayerMoves playerMoves = board.getPlayerMoves();
+            ArrayList<String> options = playerMoves.getRemovableList(false);
+            if(options.size() > 0){
+                int level = Integer.parseInt(String.valueOf(options.get(0).toCharArray()[0]));
+                int row = Integer.parseInt(String.valueOf(options.get(0).toCharArray()[1]));
+                int col = Integer.parseInt(String.valueOf(options.get(0).toCharArray()[2]));
+                move = new int[] {level,row,col};
             }
-            for (int i : new int[] {0, 1, 2}) {
-                for (int j : new int[] {0, 1, 2}) {
-                    //check nothing above
-                    try {
-                        if (board.getLevel3()[i][j] != 0) {
-                            continue;
-                        }
-                    } catch (ArrayIndexOutOfBoundsException e) {/*Ignore*/}
-                    try {
-                        if (board.getLevel3()[i - 1][j] != 0) {
-                            continue;
-                        }
-                    } catch (ArrayIndexOutOfBoundsException e) {/*Ignore*/}
-                    try {
-                        if (board.getLevel3()[i][j - 1] != 0) {
-                            continue;
-                        }
-                    } catch (ArrayIndexOutOfBoundsException e) {/*Ignore*/}
-                    try {
-                        if (board.getLevel3()[i - 1][j - 1] != 0) {
-                            continue;
-                        }
-                    } catch (ArrayIndexOutOfBoundsException e) {/*Ignore*/}
 
-                    //check correct player
-                    if (board.getLevel2()[i][j] == 2) {
-                        return new int[] {2, i, j};
-                    }
-                }
-            }
-            for (int i : new int[] {0, 1, 2, 3}) {
-                for (int j : new int[] {0, 1, 2, 3}) {
-                    //check nothing above
-                    try {
-                        if (board.getLevel2()[i][j] != 0) {
-                            continue;
-                        }
-                    } catch (ArrayIndexOutOfBoundsException e) {/*Ignore*/}
-                    try {
-                        if (board.getLevel2()[i - 1][j] != 0) {
-                            continue;
-                        }
-                    } catch (ArrayIndexOutOfBoundsException e) {/*Ignore*/}
-                    try {
-                        if (board.getLevel2()[i][j - 1] != 0) {
-                            continue;
-                        }
-                    } catch (ArrayIndexOutOfBoundsException e) {/*Ignore*/}
-                    try {
-                        if (board.getLevel2()[i - 1][j - 1] != 0) {
-                            continue;
-                        }
-                    } catch (ArrayIndexOutOfBoundsException e) {/*Ignore*/}
 
-                    //check correct player
-                    if (board.getLevel1()[i][j] == 2) {
-                        return new int[] {1, i, j};
-                    }
-                }
-            }
-            return new int[] {4, 1, 1};
         }else {
-            //int level = random.nextInt(4) + 1; //random.nextInt(max - min + 1) + 1  https://stackoverflow.com/a/20389923
-            // Start by doing some pre-processing
-
-
             for (Squares square : this.level3) {
                 int counter = 0;
                 for (int j = 0; j < square.getSquarePositions().length; j++) {
@@ -195,7 +133,10 @@ public class AiPlayerGreedy1 {
         return move;
     }
 
-
+    /**
+     * Class method intended to return the answer to "Does the AI remove more than one piece?"
+     * @return true if returning more than one, false otherwise (false permanent for this implementation)
+     */
     public boolean removeTwo() {
         return false;
     }

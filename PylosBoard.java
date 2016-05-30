@@ -11,6 +11,7 @@ public class PylosBoard {
 	private int playerPieces;
 	private int aiPieces;
 	private ArrayList<String> moves;
+	private PlayerMoves playerMoves;
 	/**
 	 * Create a new Pylos Board
 	 */
@@ -22,7 +23,7 @@ public class PylosBoard {
 		playerPieces = 15;
 		aiPieces = 15;
 
-		this.moves = new ArrayList<String>(Arrays.asList(
+		this.moves = new ArrayList<String>(Arrays.asList(	// A list of available moves.
 				// <level><row><col>
 				"100", "101", "102", "103",
 				"110", "111", "112", "113",
@@ -38,9 +39,22 @@ public class PylosBoard {
 
 				"400"
 		));
+
+		this.playerMoves = new PlayerMoves(this);
 	}
 
+	/**
+	 * A simple getter for the classes playerMoves variable.
+	 * @return Object of type PlayerMoves
+     */
+	public PlayerMoves getPlayerMoves() {
+		return playerMoves;
+	}
 
+	/**
+	 * A simple getter function/method to obtain all available moves.
+	 * @return ArrayList containing strings representing valid moves of format: <level><row><col>
+     */
 	public ArrayList<String> getMoves() {
 		return moves;
 	}
@@ -79,6 +93,11 @@ public class PylosBoard {
 		recordPieces(piece, true);
 		String moveSignature = Integer.toString(level) + Integer.toString(row) + Integer.toString(column);
 		moves.remove(moveSignature);
+		if(piece == 1) {
+			this.playerMoves.recordMove(moveSignature,true);
+		}else{
+			this.playerMoves.recordMove(moveSignature,false);
+		}
 
 		if (mayRemovePiece(piece, level, row, column)) {
 			return 1;
@@ -146,17 +165,18 @@ public class PylosBoard {
 	}
 
 	/**
-	 * Removes a piece from the board
-	 * @param level Level on the board
-	 * @param row Row on the level
-	 * @param column Column on the level
-	 * @return true if piece removed, false if not
-	 */
-	public boolean removePiece(int piece, int level, int row, int column) {
-		String moveSignature = Integer.toString(level) + Integer.toString(row) + Integer.toString(column);
+	 * A checking algorithm to ensure a single piece can be legally removed from the board.
+	 * Only checking to ensure there are no above pieces that are depending on it for support.
+	 * @param piece 	,An integer representing player pieces (1 or 2)
+	 * @param level 	,An integer ranging from 1-4 representing a board level
+	 * @param row		,An integer ranging from 0-(size of level grid) representing the row position.
+	 * @param column	,An integer ranging from 0-(size of level grid) representing the column positon.
+     * @return true if piece isn't supporting any other pieces, otherwise false.
+     */
+	public boolean notSupporting(int piece, int level, int row, int column){
 		switch (level){
 			case 1:
-				//Check for pieces above //I'm sure it could be done lots better without catching exceptions, but it works
+				//Check for pieces above //Could potentially use my "square" template to identify any above pieces.
 				try {
 					if (level2[row][column] != 0) {
 						return false;
@@ -177,17 +197,11 @@ public class PylosBoard {
 						return false;
 					}
 				} catch (ArrayIndexOutOfBoundsException e) {/*Ignore*/}
-				
-				if (level1[row][column] == piece) { //checks player is removing their own piece
-
-					this.moves.add(moveSignature);
-					level1[row][column] = 0;
-					recordPieces(piece, false);
-					return true;
+				if (level1[row][column] != piece) { //checks player is removing their own piece
+					return false;
 				}
 				break;
 			case 2:
-				//Check for pieces above //I'm sure it could be done lots better without catching exceptions, but it works
 				try {
 					if (level3[row][column] != 0) {
 						return false;
@@ -208,12 +222,9 @@ public class PylosBoard {
 						return false;
 					}
 				} catch (ArrayIndexOutOfBoundsException e) {/*Ignore*/}
-				
-				if (level2[row][column] == piece) { //checks player is removing their own piece
-					level2[row][column] = 0;
-					this.moves.add(moveSignature);
-					recordPieces(piece, false);
-					return true;
+
+				if (level2[row][column] != piece) { //checks player is removing their own piece
+					return false;
 				}
 				break;
 			case 3:
@@ -221,23 +232,73 @@ public class PylosBoard {
 					//Check for pieces above
 					return false;
 				}
-				if (level3[row][column] == piece) { //checks player is removing their own piece
+				if (level3[row][column] != piece) { //checks player is removing their own piece
+					return false;
+				}
+				break;
+			case 4:
+				if (level4 != piece) { //checks player is removing their own piece
+					return false;
+				}
+					break;
+		}
+		return true;
+	}
+
+	/**
+	 * Removes a piece from the board
+	 * @param level Level on the board
+	 * @param row Row on the level
+	 * @param column Column on the level
+	 * @return true if piece removed, false if not
+	 */
+	public boolean removePiece(int piece, int level, int row, int column) {
+		String moveSignature = Integer.toString(level) + Integer.toString(row) + Integer.toString(column);
+		if(notSupporting(piece,level,row,column)){
+			switch (level){
+				case 1:
+					this.moves.add(moveSignature);
+					level1[row][column] = 0;
+					recordPieces(piece, false);
+
+					break;
+				case 2:
+
+					level2[row][column] = 0;
+					this.moves.add(moveSignature);
+					recordPieces(piece, false);
+
+
+					break;
+				case 3:
+
+
 					level3[row][column] = 0;
 					recordPieces(piece, false);
 					this.moves.add(moveSignature);
-					return true;
-				}
-				break;
-			case 4: //impossible
-				if (level4 == piece) { //checks player is removing their own piece
+
+
+					break;
+				case 4: //impossible
+					//checks player is removing their own piece
 					level4 = 0;
 					recordPieces(piece, false);
 					this.moves.add(moveSignature);
-					return true;
-				}
-				break;
+
+
+					break;
+			}
+			if(piece == 1){
+				this.playerMoves.deleteMove(moveSignature,true);
+			}else{
+				this.playerMoves.deleteMove(moveSignature,false);
+			}
+			return true;
+		}else{
+			return false;
 		}
-		return false;
+
+
 	}
 	
 	/**
@@ -434,4 +495,120 @@ public class PylosBoard {
 	public int getLevel4() {
 		return level4;
 	}
+
+
+
+
+
+
+	public boolean canRaise(){
+
+		return false;
+	}
+
+
+	/**
+	 *
+	 * @param piece		: int, player piece (1 for human, 2 for AI)
+	 * @param levelF	: int, the board level (current position)
+	 * @param rowF		: int, row id (current position)
+	 * @param columnF	: int, column id (current position)
+	 * @param levelT	: int, the board level (new position)
+	 * @param rowT		: int, row id (new position)
+     * @param columnT	: int, column id (new position)
+     * @return int, status indicator.
+     */
+	public int raisePiece(int piece, int levelF, int rowF, int columnF, int levelT, int rowT, int columnT) {
+		//can the first half be removed
+		switch (levelF) {
+			case 1:
+				if (piece != level1[rowF][columnF]) {
+					return -1;
+				}
+				try {
+					if (level2[rowF][columnF] != 0) {
+						return -1;
+					}
+				} catch (ArrayIndexOutOfBoundsException e) {/*Ignore*/}
+				try {
+					if (level2[rowF - 1][columnF] != 0) {
+						return -1;
+					}
+				} catch (ArrayIndexOutOfBoundsException e) {/*Ignore*/}
+				try {
+					if (level2[rowF][columnF - 1] != 0) {
+						return -1;
+					}
+				} catch (ArrayIndexOutOfBoundsException e) {/*Ignore*/}
+				try {
+					if (level2[rowF - 1][columnF - 1] != 0) {
+						return -1;
+					}
+				} catch (ArrayIndexOutOfBoundsException e) {/*Ignore*/}
+				break;
+			case 2:
+				if (piece != level2[rowF][columnF]) {
+					return -1;
+				}
+				try {
+					if (level3[rowF][columnF] != 0) {
+						return -1;
+					}
+				} catch (ArrayIndexOutOfBoundsException e) {/*Ignore*/}
+				try {
+					if (level3[rowF - 1][columnF] != 0) {
+						return -1;
+					}
+				} catch (ArrayIndexOutOfBoundsException e) {/*Ignore*/}
+				try {
+					if (level3[rowF][columnF - 1] != 0) {
+						return -1;
+					}
+				} catch (ArrayIndexOutOfBoundsException e) {/*Ignore*/}
+				try {
+					if (level3[rowF - 1][columnF - 1] != 0) {
+						return -1;
+					}
+				} catch (ArrayIndexOutOfBoundsException e) {/*Ignore*/}
+				break;
+			case 3:
+				return -1;
+			case 4:
+				return -1;
+		}
+
+		//can the second half be placed?
+		switch (levelT) {
+			case 1:
+				return -1;
+			case 2:
+				if (level2[rowT][columnT] != 0) {
+					return -1;
+				}
+				if (level1[rowT][columnT] == 0 || level1[rowT + 1][columnT] == 0 || level1[rowT][columnT + 1] == 0 || level1[rowT + 1][columnT + 1] == 0 ) {
+					return -1;
+				}
+				break;
+			case 3:
+				if (level3[rowT][columnT] != 0) {
+					return -1;
+				}
+				if (level2[rowT][columnT] == 0 || level2[rowT + 1][columnT] == 0 || level2[rowT][columnT + 1] == 0 || level2[rowT + 1][columnT + 1] == 0 ) {
+					return -1;
+				}
+				break;
+			case 4:
+				return -1;
+		}
+
+		boolean removeReturn = removePiece(piece, levelF, rowF, columnF);
+		int placeReturn = placePiece(piece, levelT, rowT, columnT);
+
+		if (!removeReturn || placeReturn == -1) {
+			System.err.println("This is impossible?? - raisePiece");
+		}
+
+		return placeReturn;
+	}
+
 }
